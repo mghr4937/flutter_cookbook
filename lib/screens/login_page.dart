@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
                   gradient: LinearGradient(
                 colors: [
                   Colors.deepPurple[300],
-                  Colors.orange[200],
+                  Colors.purple[200],
                   Colors.white,
                 ],
               )),
@@ -165,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signUp(BuildContext context) {
-    Navigator.pushNamed(context, '/signup');
+    Navigator.pushNamed(context, '/register');
   }
 
   @override

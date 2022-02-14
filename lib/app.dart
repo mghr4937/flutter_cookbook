@@ -1,6 +1,7 @@
 import 'package:cookbook/connection/server_controller.dart';
 import 'package:cookbook/screens/home_page.dart';
 import 'package:cookbook/screens/login_page.dart';
+import 'package:cookbook/screens/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modulo1_fake_backend/user.dart';
 
@@ -21,10 +22,17 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.deepPurple,
           brightness: Brightness.light,
         ).copyWith(
-          secondary: Colors.orange,
+          secondary: Colors.deepPurple,
+        ),
+        appBarTheme: const AppBarTheme(
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+          ),
         ),
         textTheme:
             const TextTheme(bodyText2: TextStyle(color: Colors.deepPurple)),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute(
@@ -34,7 +42,10 @@ class MyApp extends StatelessWidget {
                 return LoginPage(_serverController, context);
               case '/home':
                 User user = settings.arguments;
-                return HomePage(user);
+                _serverController.loggedUser = user;
+                return HomePage(_serverController);
+              case '/register':
+                return RegisterPage(_serverController, context);
               default:
                 return LoginPage(_serverController, context);
             }
