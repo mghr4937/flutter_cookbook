@@ -24,7 +24,7 @@ class MyDrawer extends StatelessWidget {
             ),
             onDetailsPressed: () {
               Navigator.pop(context);
-              //_editProfile(context);
+              Navigator.pushNamed(context, '/register', arguments: serverController.loggedUser);
             }, accountEmail: null,
         ),
         ListTile(
@@ -32,7 +32,7 @@ class MyDrawer extends StatelessWidget {
           title: const Text('Mis Recetas'),
           onTap: () {
             Navigator.pop(context);
-            //Navigator.pushNamed(context, '/user_recipes');
+            Navigator.pushNamed(context, '/my-recipes');
           },
         ),
         ListTile(
@@ -40,7 +40,7 @@ class MyDrawer extends StatelessWidget {
           title: const Text('Mis Favoritos'),
           onTap: () {
             Navigator.pop(context);
-            //Navigator.pushNamed(context, '/user_favorites');
+            Navigator.pushNamed(context, '/favorites');
           },
         ),
         ListTile(

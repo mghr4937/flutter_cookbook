@@ -6,9 +6,11 @@ import 'package:flutter_modulo1_fake_backend/user.dart';
 
 class RegisterPage extends StatefulWidget {
   final ServerController serverController;
+  final User userToEdit;
   final BuildContext context;
 
-  const RegisterPage(this.serverController, this.context, {Key key})
+  const RegisterPage(this.serverController, this.context,
+      {Key key, this.userToEdit})
       : super(key: key);
 
   @override
@@ -32,7 +34,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key:_scaffoldKey,
+      key: _scaffoldKey,
       body: Form(
         key: _formKey,
         child: Stack(
@@ -50,7 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: AppBar(
                 elevation: 0,
                 backgroundColor: Colors.transparent,
-                title: const Text("Registarse"),
+                title: Text((editinguser) ? "Editar Perfil" : "Registrarse"),
                 iconTheme: const IconThemeData(color: Colors.white),
               ),
             ),
@@ -65,11 +67,14 @@ class _RegisterPageState extends State<RegisterPage> {
                   margin: const EdgeInsets.only(
                       left: 20, right: 20, top: 260, bottom: 20),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 0, horizontal: 20),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                     child: ListView(
                       children: <Widget>[
                         TextFormField(
+                          initialValue: widget.userToEdit != null
+                              ? widget.userToEdit.nickname
+                              : "",
                           decoration: const InputDecoration(
                             labelText: 'Usuario',
                           ),
@@ -85,7 +90,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         const SizedBox(height: 20),
                         TextFormField(
-                          initialValue: password,
+                          initialValue: widget.userToEdit != null
+                              ? widget.userToEdit.password
+                              : "",
                           decoration: InputDecoration(
                               labelText: "Contraseña:",
                               suffixIcon: IconButton(
@@ -150,13 +157,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: () {
-                            _register(context);
-                          },
+                          onPressed: () => _doProcess(context),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              const Text('Registrarse'),
+                              Text((editinguser) ? "Editar" : "Registrar"),
                               if (_isLoading)
                                 Container(
                                     height: 20,
@@ -191,7 +196,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void _register(BuildContext context) async{
+  void _doProcess(BuildContext context) async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       if (imageFile == null) {
@@ -203,30 +208,36 @@ class _RegisterPageState extends State<RegisterPage> {
           nickname: username,
           password: password,
           photo: imageFile);
-      final state = await  widget.serverController.register(user);
-      if (!state){
-        showSnackBar(context, "No se pudo guardar", Colors.deepOrange);
-      }else{
-        showDialog(context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: const Text('Registro exitoso'),
-              content: const Text('Bienvenido!!'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Ok'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ));
+      bool state;
+      if (editinguser) {
+        user.id = widget.serverController.loggedUser.id;
+        state = await widget.serverController.editUser(user);
+      } else {
+        state = await widget.serverController.register(user);
       }
-
-
+      final action = editinguser ? "actualizar" : "guardar";
+      final action2 = editinguser ? "Actualizado" : "Guardado";
+      if (!state) {
+        showSnackBar(context, "No se pudo $action el usuario, intente de nuevo",
+            Colors.deepOrange);
+      } else {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+                  title: Text("$action2 correctamente"),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Ok'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ));
+      }
     }
   }
-
 
   void showSnackBar(BuildContext context, String title, Color backColor) {
     _scaffoldKey.currentState.showSnackBar(
@@ -241,18 +252,17 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   editinguser = (widget.userToEdit != null);
-  //
-  //   if (editinguser) {
-  //     username = widget.userToEdit.nickname;
-  //     password = widget.userToEdit.password;
-  //     imageFile = widget.userToEdit.photo;
-  //     genrer = widget.userToEdit.genrer;
-  //   }
-  // }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    editinguser = (widget.userToEdit != null);
 
+    if (editinguser) {
+      username = widget.userToEdit.nickname;
+      password = widget.userToEdit.password;
+      imageFile = widget.userToEdit.photo;
+      genrer = widget.userToEdit.genrer;
+    }
+  }
 }
